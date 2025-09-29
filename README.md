@@ -1,3 +1,32 @@
+# Why Express Doesn't Work in Cloudflare Workers
+
+The main reason Express doesn't work in Cloudflare Workers is because of the runtime environment:
+
+## 1. Different Runtime
+
+- Express is built for Node.js, which gives you access to APIs like `http`, `net`, `fs`, `streams`, etc.
+- Cloudflare Workers run on V8 isolates (like a browser environment), not Node.js. They don't support Node's core modules (`http`, `fs`, etc.), so Express can't even bootstrap its server.
+
+## 2. Request/Response Handling
+
+- In Node.js, Express listens for requests using `http.createServer()`.
+- In Workers, you don't run a server — Cloudflare handles that. Instead, you respond to fetch events with the Web Fetch API (`Request` and `Response` objects). Express isn't designed for that model.
+
+## 3. Performance Model
+
+- Workers are lightweight isolates with strict CPU and memory limits.
+- Express depends on middleware patterns and abstractions optimized for long-running Node servers. That overhead doesn't fit well in Workers' short-lived execution model.
+
+## Why We Use Hono
+
+Hono is a lightweight web framework designed to work in multiple runtimes: Cloudflare Workers, Bun, Deno, Node.js.
+
+- It's built on the Web Fetch API (request/response), not Node's `http` module.
+- It has an Express-like syntax (`app.get('/', ...)`) so developers familiar with Express feel at home.
+- It's small, fast, and edge-friendly, perfect for the Workers environment.
+
+👉 **Think of Hono as "Express for Edge runtimes".**
+
 # Cloudflare Workers Setup Guide
 
 ## 1. Create a new Worker project
